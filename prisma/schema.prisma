@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Utilisateur {
+  id           String     @id @default(uuid())
+  nom          String
+  email        String     @unique
+  motDePasse   String
+  role         Role       @default(VISITEUR)
+  estActif     Boolean    @default(true)
+  dateCreation DateTime   @default(now())
+  dateMaj      DateTime   @updatedAt
+  pharmacie    Pharmacie?
+}
+
+model Pharmacie {
+  id             String      @id @default(uuid())
+  nom            String
+  adresse        String
+  quartier       String
+  telephone      String
+  latitude       Float
+  longitude      Float
+  horaires       String
+  estValidee     Boolean     @default(false)
+  dateCreation   DateTime    @default(now())
+  dateMaj        DateTime    @updatedAt
+  proprietaireId String      @unique
+  proprietaire   Utilisateur @relation(fields: [proprietaireId], references: [id])
+  stocks         Stock[]
+  gardes         Garde[]
+}
+
+model Medicament {
+  id            String   @id @default(uuid())
+  nomCommercial String
+  nomGenerique  String
+  description   String?
+  categorie     String
+  dateCreation  DateTime @default(now())
+  dateMaj       DateTime @updatedAt
+  stocks        Stock[]
+}
+
+model Stock {
+  id            String     @id @default(uuid())
+  quantite      Int        @default(0)
+  prix          Float
+  estDisponible Boolean    @default(true)
+  dateMaj       DateTime   @updatedAt
+  pharmacieId   String
+  medicamentId  String
+  pharmacie     Pharmacie  @relation(fields: [pharmacieId], references: [id])
+  medicament    Medicament @relation(fields: [medicamentId], references: [id])
+
+  @@unique([pharmacieId, medicamentId])
+}
+
+model Garde {
+  id          String    @id @default(uuid())
+  dateDebut   DateTime
+  dateFin     DateTime
+  typeGarde   TypeGarde @default(JOUR)
+  pharmacieId String
+  pharmacie   Pharmacie @relation(fields: [pharmacieId], references: [id])
+}
+
+enum Role {
+  VISITEUR
+  PHARMACIEN
+  ADMIN
+}
+
+enum TypeGarde {
+  JOUR
+  NUIT
+}
