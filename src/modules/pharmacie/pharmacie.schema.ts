@@ -26,5 +26,14 @@ export const modifierPharmacieSchema = z.object({
   horaires: z.string().min(2).optional(),
 });
 
+/**
+ * Schéma de validation pour le changement de statut d'ouverture.
+ */
+export const changerStatutSchema = z.object({
+  estOuverte: z.boolean(),
+});
+
+export type ChangerStatutDto = z.infer<typeof changerStatutSchema>;
+
 export type CreerPharmacieDto = z.infer<typeof creerPharmacieSchema>;
 export type ModifierPharmacieDto = z.infer<typeof modifierPharmacieSchema>;

@@ -11,7 +11,7 @@ import { CreerPharmacieDto, ModifierPharmacieDto } from './pharmacie.schema';
 export const pharmacieService = {
 
   /**
-   * Récupère toutes les pharmacies validées.
+   * Récupère toutes les pharmacies validées et ouvertes.
    */
   obtenirToutes: () => {
     return pharmacieRepository.trouverToutes();
@@ -33,7 +33,7 @@ export const pharmacieService = {
   },
 
   /**
-   * Recherche les pharmacies ayant un médicament disponible
+   * Recherche les pharmacies ouvertes ayant un médicament disponible
    * et calcule la distance depuis la position de l'utilisateur.
    * @param nomMedicament - Nom du médicament recherché
    * @param latitude - Latitude de l'utilisateur
@@ -44,7 +44,7 @@ export const pharmacieService = {
     latitude?: number,
     longitude?: number
   ) => {
-    if (!nomMedicament.trim()) {
+    if (!nomMedicament || !nomMedicament.trim()) {
       throw new ErreurApplication(
         MESSAGES.GENERAL.TERME_RECHERCHE_VIDE,
         CODES_HTTP.REQUETE_INVALIDE
@@ -53,12 +53,11 @@ export const pharmacieService = {
 
     const pharmacies = await pharmacieRepository.rechercherParMedicament(nomMedicament);
 
-    // Si les coordonnées GPS sont fournies, calculer et trier par distance
     if (latitude && longitude) {
       type PharmacieAvecDistance = (typeof pharmacies)[0] & { distance: number };
 
-const pharmaciesAvecDistance: PharmacieAvecDistance[] = pharmacies.map(
-  (pharmacie: (typeof pharmacies)[0]): PharmacieAvecDistance => ({
+      const pharmaciesAvecDistance: PharmacieAvecDistance[] = pharmacies.map(
+        (pharmacie: (typeof pharmacies)[0]): PharmacieAvecDistance => ({
           ...pharmacie,
           distance: calculerDistanceKm(
             latitude,
@@ -69,7 +68,6 @@ const pharmaciesAvecDistance: PharmacieAvecDistance[] = pharmacies.map(
         })
       );
 
-      // Trier par distance croissante
       return pharmaciesAvecDistance.sort(
         (a: PharmacieAvecDistance, b: PharmacieAvecDistance) =>
           a.distance - b.distance
@@ -80,7 +78,7 @@ const pharmaciesAvecDistance: PharmacieAvecDistance[] = pharmacies.map(
   },
 
   /**
-   * Retourne les pharmacies de garde aujourd'hui.
+   * Retourne les pharmacies de garde en ce moment.
    */
   obtenirDeGarde: () => {
     return pharmacieRepository.trouverDeGarde();
@@ -97,11 +95,21 @@ const pharmaciesAvecDistance: PharmacieAvecDistance[] = pharmacies.map(
 
   /**
    * Modifie une pharmacie existante.
+   * Vérifie que le pharmacien est bien le propriétaire.
    * @param id - Identifiant de la pharmacie
    * @param donnees - Données à modifier
+   * @param proprietaireId - Id du pharmacien connecté
    */
-  modifier: async (id: string, donnees: ModifierPharmacieDto) => {
-    await pharmacieService.obtenirParId(id);
+  modifier: async (id: string, donnees: ModifierPharmacieDto, proprietaireId: string) => {
+    const pharmacie = await pharmacieService.obtenirParId(id);
+
+    if (pharmacie.proprietaireId !== proprietaireId) {
+      throw new ErreurApplication(
+        MESSAGES.AUTH.ACCES_REFUSE,
+        CODES_HTTP.ACCES_REFUSE
+      );
+    }
+
     return pharmacieRepository.modifier(id, donnees);
   },
 
@@ -122,15 +130,41 @@ const pharmaciesAvecDistance: PharmacieAvecDistance[] = pharmacies.map(
     await pharmacieService.obtenirParId(id);
     return pharmacieRepository.supprimer(id);
   },
+
+  /**
+   * Change le statut d'ouverture d'une pharmacie.
+   * Si la pharmacie a une garde active, elle ne peut pas être fermée.
+   * @param id - Identifiant de la pharmacie
+   * @param estOuverte - Nouveau statut souhaité
+   * @param proprietaireId - Id du pharmacien connecté
+   */
+  changerStatut: async (id: string, estOuverte: boolean, proprietaireId: string) => {
+    const pharmacie = await pharmacieService.obtenirParId(id);
+
+    if (pharmacie.proprietaireId !== proprietaireId) {
+      throw new ErreurApplication(
+        MESSAGES.AUTH.ACCES_REFUSE,
+        CODES_HTTP.ACCES_REFUSE
+      );
+    }
+
+    if (!estOuverte) {
+      const gardeActive = await pharmacieRepository.aGardeActive(id);
+      if (gardeActive) {
+        throw new ErreurApplication(
+          'Impossible de fermer une pharmacie avec une garde active',
+          CODES_HTTP.REQUETE_INVALIDE
+        );
+      }
+    }
+
+    return pharmacieRepository.changerStatut(id, estOuverte);
+  },
 };
 
 /**
  * Calcule la distance en kilomètres entre deux points GPS.
  * Utilise la formule de Haversine.
- * @param lat1 - Latitude du point 1
- * @param lon1 - Longitude du point 1
- * @param lat2 - Latitude du point 2
- * @param lon2 - Longitude du point 2
  */
 function calculerDistanceKm(
   lat1: number,
@@ -153,10 +187,6 @@ function calculerDistanceKm(
   return Math.round(RAYON_TERRE_KM * c * 10) / 10;
 }
 
-/**
- * Convertit des degrés en radians.
- * @param degres - Valeur en degrés
- */
 function degresEnRadians(degres: number): number {
   return degres * (Math.PI / 180);
 }

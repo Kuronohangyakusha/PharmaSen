@@ -35,7 +35,7 @@ export const stockService = {
   },
 
   /**
-   * Compare les prix d'un médicament entre toutes les pharmacies.
+   * Compare les prix d'un médicament entre toutes les pharmacies ouvertes.
    * @param medicamentId - Identifiant du médicament
    */
   comparerPrix: (medicamentId: string) => {
@@ -44,14 +44,24 @@ export const stockService = {
 
   /**
    * Ajoute un médicament au stock d'une pharmacie.
-   * Vérifie que le médicament n'est pas déjà dans le stock.
+   * Vérifie que la pharmacie est validée et que le médicament n'est pas déjà dans le stock.
    * @param donnees - Données du stock
-   * @param pharmacieId - Identifiant de la pharmacie
+   * @param proprietaireId - Identifiant du pharmacien connecté
    */
-  creer: async (donnees: CreerStockDto, pharmacieId: string) => {
+  creer: async (donnees: CreerStockDto, proprietaireId: string) => {
+    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
+
+    // Vérifier que la pharmacie est validée par l'admin
+    if (!pharmacie.estValidee) {
+      throw new ErreurApplication(
+        'Votre pharmacie doit être validée par un administrateur pour gérer le stock',
+        CODES_HTTP.ACCES_REFUSE
+      );
+    }
+
     // Vérifier que le médicament n'est pas déjà dans le stock
     const stockExistant = await stockRepository.trouverParPharmacieEtMedicament(
-      pharmacieId,
+      pharmacie.id,
       donnees.medicamentId
     );
 
@@ -62,7 +72,7 @@ export const stockService = {
       );
     }
 
-    return stockRepository.creer(donnees, pharmacieId);
+    return stockRepository.creer(donnees, pharmacie.id);
   },
 
   /**
@@ -105,6 +115,7 @@ export const stockService = {
 
   /**
    * Récupère la pharmacie d'un pharmacien connecté.
+   * Lance une erreur 404 si le pharmacien n'a pas encore de pharmacie.
    * @param proprietaireId - Id du pharmacien connecté
    */
   obtenirPharmacieduPharmacien: async (proprietaireId: string) => {

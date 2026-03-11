@@ -30,6 +30,7 @@ model Pharmacie {
   longitude      Float
   horaires       String
   estValidee     Boolean     @default(false)
+  estOuverte     Boolean     @default(true)
   dateCreation   DateTime    @default(now())
   dateMaj        DateTime    @updatedAt
   proprietaireId String      @unique

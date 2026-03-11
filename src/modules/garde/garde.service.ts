@@ -41,22 +41,30 @@ export const gardeService = {
   },
 
   /**
-   * Crée une nouvelle garde pour le pharmacien connecté.
-   * Vérifie que la date de fin est après la date de début.
+   * Crée une nouvelle garde pour la pharmacie du pharmacien connecté.
+   * Vérifie que la pharmacie est validée avant de créer la garde.
    * @param donnees - Données de la garde
    * @param proprietaireId - Id du pharmacien connecté
    */
   creer: async (donnees: CreerGardeDto, proprietaireId: string) => {
-    // Vérifier que la date de fin est après la date de début
-    if (new Date(donnees.dateFin) <= new Date(donnees.dateDebut)) {
+    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
+
+    // Vérifier que la pharmacie est validée par l'admin
+    if (!pharmacie.estValidee) {
       throw new ErreurApplication(
-        'La date de fin doit être après la date de début',
+        'Votre pharmacie doit être validée par un administrateur pour déclarer une garde',
+        CODES_HTTP.ACCES_REFUSE
+      );
+    }
+
+    // Vérifier que les dates sont cohérentes
+    if (new Date(donnees.dateDebut) >= new Date(donnees.dateFin)) {
+      throw new ErreurApplication(
+        'La date de début doit être antérieure à la date de fin',
         CODES_HTTP.REQUETE_INVALIDE
       );
     }
 
-    // Récupérer la pharmacie du pharmacien
-    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
     return gardeRepository.creer(donnees, pharmacie.id);
   },
 
@@ -76,6 +84,16 @@ export const gardeService = {
         MESSAGES.AUTH.ACCES_REFUSE,
         CODES_HTTP.ACCES_REFUSE
       );
+    }
+
+    // Vérifier la cohérence des dates si les deux sont fournies
+    if (donnees.dateDebut && donnees.dateFin) {
+      if (new Date(donnees.dateDebut) >= new Date(donnees.dateFin)) {
+        throw new ErreurApplication(
+          'La date de début doit être antérieure à la date de fin',
+          CODES_HTTP.REQUETE_INVALIDE
+        );
+      }
     }
 
     return gardeRepository.modifier(id, donnees);

@@ -68,7 +68,8 @@ export const pharmacieController = {
   modifier: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;
-      const pharmacie = await pharmacieService.modifier(id, req.body);
+      const proprietaireId = req.utilisateur!.id;
+      const pharmacie = await pharmacieService.modifier(id, req.body, proprietaireId);
       repondreSucces(res, pharmacie, MESSAGES.PHARMACIE.MODIFIE_SUCCES);
     } catch (erreur) {
       next(erreur);
@@ -81,6 +82,20 @@ export const pharmacieController = {
       const id = req.params['id'] as string;
       const pharmacie = await pharmacieService.valider(id);
       repondreSucces(res, pharmacie, MESSAGES.PHARMACIE.VALIDEE_SUCCES);
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
+
+  /** PATCH /api/pharmacies/:id/statut */
+  changerStatut: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = req.params['id'] as string;
+      const proprietaireId = req.utilisateur!.id;
+      const { estOuverte } = req.body;
+      const pharmacie = await pharmacieService.changerStatut(id, estOuverte, proprietaireId);
+      const message = estOuverte ? 'Pharmacie ouverte' : 'Pharmacie fermée';
+      repondreSucces(res, pharmacie, message);
     } catch (erreur) {
       next(erreur);
     }

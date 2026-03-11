@@ -8,11 +8,11 @@ import { CreerPharmacieDto, ModifierPharmacieDto } from './pharmacie.schema';
 export const pharmacieRepository = {
 
   /**
-   * Retourne toutes les pharmacies validées.
+   * Retourne toutes les pharmacies validées et ouvertes.
    */
   trouverToutes: () => {
     return prisma.pharmacie.findMany({
-      where: { estValidee: true },
+      where: { estValidee: true, estOuverte: true },
       orderBy: { nom: 'asc' },
     });
   },
@@ -33,13 +33,14 @@ export const pharmacieRepository = {
   },
 
   /**
-   * Recherche les pharmacies ayant un médicament disponible.
+   * Recherche les pharmacies ouvertes ayant un médicament disponible.
    * @param nomMedicament - Nom du médicament recherché
    */
   rechercherParMedicament: (nomMedicament: string) => {
     return prisma.pharmacie.findMany({
       where: {
         estValidee: true,
+        estOuverte: true,
         stocks: {
           some: {
             estDisponible: true,
@@ -70,7 +71,7 @@ export const pharmacieRepository = {
   },
 
   /**
-   * Retourne les pharmacies de garde aujourd'hui.
+   * Retourne les pharmacies de garde en ce moment.
    */
   trouverDeGarde: () => {
     const maintenant = new Date();
@@ -133,6 +134,7 @@ export const pharmacieRepository = {
   supprimer: (id: string) => {
     return prisma.pharmacie.delete({ where: { id } });
   },
+
   /**
    * Trouve la pharmacie d'un propriétaire.
    * @param proprietaireId - Identifiant du propriétaire
@@ -141,5 +143,32 @@ export const pharmacieRepository = {
     return prisma.pharmacie.findUnique({
       where: { proprietaireId },
     });
-  }
+  },
+
+  /**
+   * Change le statut d'ouverture d'une pharmacie.
+   * @param id - Identifiant de la pharmacie
+   * @param estOuverte - Nouveau statut
+   */
+  changerStatut: (id: string, estOuverte: boolean) => {
+    return prisma.pharmacie.update({
+      where: { id },
+      data: { estOuverte },
+    });
+  },
+
+  /**
+   * Vérifie si une pharmacie a une garde active en ce moment.
+   * @param id - Identifiant de la pharmacie
+   */
+  aGardeActive: (id: string) => {
+    const maintenant = new Date();
+    return prisma.garde.findFirst({
+      where: {
+        pharmacieId: id,
+        dateDebut: { lte: maintenant },
+        dateFin: { gte: maintenant },
+      },
+    });
+  },
 };

@@ -47,20 +47,20 @@ export const stockRepository = {
    * Compare les prix d'un médicament entre toutes les pharmacies.
    * @param medicamentId - Identifiant du médicament
    */
-  comparerPrix: (medicamentId: string) => {
-    return prisma.stock.findMany({
-      where: {
-        medicamentId,
-        estDisponible: true,
-        pharmacie: { estValidee: true },
-      },
-      include: {
-        pharmacie: true,
-        medicament: true,
-      },
-      orderBy: { prix: 'asc' },
-    });
-  },
+comparerPrix: (medicamentId: string) => {
+  return prisma.stock.findMany({
+    where: {
+      medicamentId,
+      estDisponible: true,
+      pharmacie: { estValidee: true, estOuverte: true },
+    },
+    include: {
+      pharmacie: true,
+      medicament: true,
+    },
+    orderBy: { prix: 'asc' },
+  });
+},
 
   /**
    * Crée un nouveau stock.
