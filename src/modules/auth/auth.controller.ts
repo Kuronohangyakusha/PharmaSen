@@ -48,4 +48,18 @@ export const authController = {
       next(erreur);
     }
   },
+
+  /**
+   * Modification du profil de l'utilisateur connecté.
+   * PUT /api/auth/profil
+   */
+  modifierProfil: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { nom, email } = req.body;
+      const profil = await authService.modifierProfil(req.utilisateur!.id, { nom, email });
+      repondreSucces(res, profil, 'Profil mis à jour avec succès');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
 };

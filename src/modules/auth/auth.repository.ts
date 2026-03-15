@@ -55,4 +55,24 @@ export const authRepository = {
       },
     });
   },
+
+  /**
+   * Modifie un utilisateur.
+   * @param id - Identifiant de l'utilisateur
+   * @param donnees - Données à modifier
+   */
+  modifierUtilisateur: (id: string, donnees: { nom?: string; email?: string }) => {
+    return prisma.utilisateur.update({
+      where: { id },
+      data: donnees,
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        role: true,
+        estActif: true,
+        dateCreation: true,
+      },
+    });
+  },
 };

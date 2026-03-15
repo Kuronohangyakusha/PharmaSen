@@ -20,4 +20,7 @@ router.post('/connexion', valider(connexionSchema), authController.connecter);
 // GET /api/auth/profil (protégée)
 router.get('/profil', verifierAuth, authController.obtenirProfil);
 
+// PUT /api/auth/profil (protégée)
+router.put('/profil', verifierAuth, authController.modifierProfil);
+
 export default router;

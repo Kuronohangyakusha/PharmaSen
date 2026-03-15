@@ -106,4 +106,20 @@ const token = jwt.sign(
     }
     return utilisateur;
   },
+
+  /**
+   * Modifie le profil de l'utilisateur connecté.
+   * @param id - Identifiant de l'utilisateur
+   * @param donnees - Données à modifier
+   */
+  modifierProfil: async (id: string, donnees: { nom?: string; email?: string }) => {
+    const utilisateur = await authRepository.trouverParId(id);
+    if (!utilisateur) {
+      throw new ErreurApplication(
+        MESSAGES.AUTH.TOKEN_INVALIDE,
+        CODES_HTTP.NON_AUTHENTIFIE
+      );
+    }
+    return authRepository.modifierUtilisateur(id, donnees);
+  },
 };
