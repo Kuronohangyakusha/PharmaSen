@@ -53,14 +53,6 @@ export const stockService = {
   creer: async (donnees: CreerStockDto, proprietaireId: string) => {
     const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
 
-    // Vérifier que la pharmacie est validée par l'admin
-    if (!pharmacie.estValidee) {
-      throw new ErreurApplication(
-        'Votre pharmacie doit être validée par un administrateur pour gérer le stock',
-        CODES_HTTP.ACCES_REFUSE
-      );
-    }
-
     // Vérifier que le médicament n'est pas déjà dans le stock
     const stockExistant = await stockRepository.trouverParPharmacieEtMedicament(
       pharmacie.id,
