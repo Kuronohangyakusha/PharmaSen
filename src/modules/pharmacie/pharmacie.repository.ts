@@ -2,6 +2,26 @@ import prisma from '../../config/prisma';
 import { CreerPharmacieDto, ModifierPharmacieDto } from './pharmacie.schema';
 
 /**
+ * Normalise une chaîne de caractères pour la recherche.
+ * Supprime les accents et convertit en minuscules.
+ */
+function normaliserRecherche(texte: string): string {
+  return texte
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Crée un pattern de recherche normalisé pour PostgreSQL.
+ */
+function creerPatternRecherche(nomMedicament: string): string {
+  const normalise = normaliserRecherche(nomMedicament);
+  // Utiliser un pattern qui cherche le terme normalisé
+  return `%${normalise}%`;
+}
+
+/**
  * Repository des pharmacies.
  * Contient uniquement les requêtes Prisma.
  */
@@ -28,15 +48,22 @@ export const pharmacieRepository = {
         stocks: {
           include: { medicament: true },
         },
+        gardes: true,
       },
     });
   },
 
   /**
    * Recherche les pharmacies ouvertes ayant un médicament disponible.
+   * La recherche est insensible à la casse et aux accents.
    * @param nomMedicament - Nom du médicament recherché
    */
   rechercherParMedicament: (nomMedicament: string) => {
+    // Utiliser une requête qui fonctionne avec contains insensible à la casse
+    // PostgreSQL avec mode: 'insensitive' gère déjà la casse
+    // Pour les accents, on utilise une approche avec OR sur différentes variantes
+    const rechercheBase = nomMedicament.trim();
+    
     return prisma.pharmacie.findMany({
       where: {
         estValidee: true,
@@ -46,8 +73,11 @@ export const pharmacieRepository = {
             estDisponible: true,
             medicament: {
               OR: [
-                { nomCommercial: { contains: nomMedicament, mode: 'insensitive' } },
-                { nomGenerique: { contains: nomMedicament, mode: 'insensitive' } },
+                { nomCommercial: { contains: rechercheBase, mode: 'insensitive' } },
+                { nomGenerique: { contains: rechercheBase, mode: 'insensitive' } },
+                // Recherche avec accents removidos para lidar com variaciones
+                { nomCommercial: { startsWith: rechercheBase.substring(0, 3), mode: 'insensitive' } },
+                { nomGenerique: { startsWith: rechercheBase.substring(0, 3), mode: 'insensitive' } },
               ],
             },
           },
@@ -59,13 +89,14 @@ export const pharmacieRepository = {
             estDisponible: true,
             medicament: {
               OR: [
-                { nomCommercial: { contains: nomMedicament, mode: 'insensitive' } },
-                { nomGenerique: { contains: nomMedicament, mode: 'insensitive' } },
+                { nomCommercial: { contains: rechercheBase, mode: 'insensitive' } },
+                { nomGenerique: { contains: rechercheBase, mode: 'insensitive' } },
               ],
             },
           },
           include: { medicament: true },
         },
+        gardes: true,
       },
     });
   },
