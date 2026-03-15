@@ -85,6 +85,15 @@ export const pharmacieService = {
   },
 
   /**
+   * Retourne la pharmacie du pharmacien connecté.
+   * @param proprietaireId - Id du pharmacien connecté
+   */
+  obtenirMaPharmacie: async (proprietaireireId: string) => {
+    const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireireId);
+    return pharmacie;
+  },
+
+  /**
    * Crée une nouvelle pharmacie pour un pharmacien.
    * @param donnees - Données de la pharmacie
    * @param proprietaireId - Id du pharmacien connecté

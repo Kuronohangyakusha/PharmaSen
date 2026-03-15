@@ -17,6 +17,7 @@ const router = Router();
 router.get('/', pharmacieController.obtenirToutes);
 router.get('/recherche', pharmacieController.rechercher);
 router.get('/garde', pharmacieController.obtenirDeGarde);
+router.get('/moi', verifierAuth, verifierRole('PHARMACIEN'), pharmacieController.obtenirMaPharmacie);
 router.get('/:id', pharmacieController.obtenirParId);
 
 // Routes protégées

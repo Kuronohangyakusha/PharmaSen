@@ -42,6 +42,17 @@ export const pharmacieController = {
     }
   },
 
+  /** GET /api/pharmacies/moi */
+  obtenirMaPharmacie: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const proprietaireId = req.utilisateur!.id;
+      const pharmacie = await pharmacieService.obtenirMaPharmacie(proprietaireId);
+      repondreSucces(res, pharmacie, 'Ma pharmacie récupérée');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
+
   /** GET /api/pharmacies/:id */
   obtenirParId: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
