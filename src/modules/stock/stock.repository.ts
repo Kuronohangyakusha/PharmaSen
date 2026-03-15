@@ -47,7 +47,7 @@ export const stockRepository = {
    * Compare les prix d'un médicament entre toutes les pharmacies.
    * @param medicamentId - Identifiant du médicament
    */
-comparerPrix: (medicamentId: string) => {
+comparerPrix: (medicamentId: string, latitude?: number, longitude?: number) => {
   return prisma.stock.findMany({
     where: {
       medicamentId,

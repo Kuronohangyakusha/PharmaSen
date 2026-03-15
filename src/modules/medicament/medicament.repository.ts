@@ -28,14 +28,16 @@ export const medicamentRepository = {
 
   /**
    * Recherche des médicaments par nom commercial ou générique.
+   * La recherche est insensible à la casse.
    * @param terme - Terme de recherche
    */
   rechercherParNom: (terme: string) => {
+    const termeNormalise = terme.trim().toLowerCase();
     return prisma.medicament.findMany({
       where: {
         OR: [
-          { nomCommercial: { contains: terme, mode: 'insensitive' } },
-          { nomGenerique: { contains: terme, mode: 'insensitive' } },
+          { nomCommercial: { contains: termeNormalise, mode: 'insensitive' } },
+          { nomGenerique: { contains: termeNormalise, mode: 'insensitive' } },
         ],
       },
       orderBy: { nomCommercial: 'asc' },

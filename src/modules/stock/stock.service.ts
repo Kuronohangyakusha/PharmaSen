@@ -37,9 +37,11 @@ export const stockService = {
   /**
    * Compare les prix d'un médicament entre toutes les pharmacies ouvertes.
    * @param medicamentId - Identifiant du médicament
+   * @param latitude - Latitude de l'utilisateur
+   * @param longitude - Longitude de l'utilisateur
    */
-  comparerPrix: (medicamentId: string) => {
-    return stockRepository.comparerPrix(medicamentId);
+  comparerPrix: (medicamentId: string, latitude?: number, longitude?: number) => {
+    return stockRepository.comparerPrix(medicamentId, latitude, longitude);
   },
 
   /**

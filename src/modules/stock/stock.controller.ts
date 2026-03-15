@@ -20,11 +20,13 @@ export const stockController = {
     }
   },
 
-  /** GET /api/stocks/comparateur?medicamentId= */
+  /** GET /api/stocks/comparateur?medicamentId=&lat=&lng= */
   comparerPrix: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const medicamentId = req.query['medicamentId'] as string;
-      const comparaison = await stockService.comparerPrix(medicamentId);
+      const lat = req.query['lat'] ? Number(req.query['lat']) : undefined;
+      const lng = req.query['lng'] ? Number(req.query['lng']) : undefined;
+      const comparaison = await stockService.comparerPrix(medicamentId, lat, lng);
       repondreSucces(res, comparaison, 'Comparaison des prix effectuée');
     } catch (erreur) {
       next(erreur);

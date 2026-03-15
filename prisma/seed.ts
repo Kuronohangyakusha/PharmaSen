@@ -144,42 +144,27 @@ async function main() {
   console.log(`📦 ${stocksData.length} stocks créés`);
 
   // ================================
-  // Création des gardes
+  // Création des gardes pour AUJOURD'HUI
   // ================================
-  const maintenant = new Date();
-  const demain = new Date(maintenant);
-  demain.setDate(maintenant.getDate() + 1);
-  const apresdemain = new Date(maintenant);
-  apresdemain.setDate(maintenant.getDate() + 2);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
 
   await Promise.all([
-    // Garde de nuit ce soir
+    // Garde de jour AUJOURD'HUI
     prisma.garde.create({ data: {
       pharmacieId: pharmacies[0].id,
-      dateDebut: new Date(maintenant.toDateString() + ' 20:00:00'),
-      dateFin: new Date(demain.toDateString() + ' 08:00:00'),
-      typeGarde: 'NUIT',
+      dateDebut: new Date(today.getTime() + 8 * 60 * 60 * 1000), // 08:00
+      dateFin: new Date(today.getTime() + 20 * 60 * 60 * 1000),   // 20:00
+      typeGarde: 'JOUR',
     }}),
-    // Garde de jour demain
+    // Garde de nuit AUJOURD'HUI
     prisma.garde.create({ data: {
       pharmacieId: pharmacies[2].id,
-      dateDebut: new Date(demain.toDateString() + ' 08:00:00'),
-      dateFin: new Date(demain.toDateString() + ' 20:00:00'),
-      typeGarde: 'JOUR',
-    }}),
-    // Garde de nuit demain
-    prisma.garde.create({ data: {
-      pharmacieId: pharmacies[4].id,
-      dateDebut: new Date(demain.toDateString() + ' 20:00:00'),
-      dateFin: new Date(apresdemain.toDateString() + ' 08:00:00'),
+      dateDebut: new Date(today.getTime() + 20 * 60 * 60 * 1000), // 20:00
+      dateFin: new Date(tomorrow.getTime() + 8 * 60 * 60 * 1000),   // 08:00 tomorrow
       typeGarde: 'NUIT',
-    }}),
-    // Garde de jour après-demain
-    prisma.garde.create({ data: {
-      pharmacieId: pharmacies[6].id,
-      dateDebut: new Date(apresdemain.toDateString() + ' 08:00:00'),
-      dateFin: new Date(apresdemain.toDateString() + ' 20:00:00'),
-      typeGarde: 'JOUR',
     }}),
   ]);
 
