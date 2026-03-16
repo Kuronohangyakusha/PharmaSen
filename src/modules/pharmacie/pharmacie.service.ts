@@ -94,6 +94,20 @@ export const pharmacieService = {
   },
 
   /**
+   * Retourne toutes les pharmacies en attente de validation (admin).
+   */
+  obtenirEnAttente: () => {
+    return pharmacieRepository.trouverEnAttente();
+  },
+
+  /**
+   * Retourne toutes les pharmacies pour l'admin (incluant non validées).
+   */
+  obtenirToutesAdmin: () => {
+    return pharmacieRepository.trouverToutesAdmin();
+  },
+
+  /**
    * Crée une nouvelle pharmacie pour un pharmacien.
    * @param donnees - Données de la pharmacie
    * @param proprietaireId - Id du pharmacien connecté

@@ -122,4 +122,24 @@ export const pharmacieController = {
       next(erreur);
     }
   },
+
+  /** GET /api/pharmacies/en-attente */
+  obtenirEnAttente: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const pharmacies = await pharmacieService.obtenirEnAttente();
+      repondreSucces(res, pharmacies, 'Pharmacies en attente de validation');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
+
+  /** GET /api/pharmacies/toutes */
+  obtenirToutesAdmin: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const pharmacies = await pharmacieService.obtenirToutesAdmin();
+      repondreSucces(res, pharmacies, 'Toutes les pharmacies');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
 };

@@ -27,4 +27,8 @@ router.patch('/:id/valider', verifierAuth, verifierRole('ADMIN'), pharmacieContr
 router.patch('/:id/statut', verifierAuth, verifierRole('PHARMACIEN'), valider(changerStatutSchema), pharmacieController.changerStatut);
 router.delete('/:id', verifierAuth, verifierRole('ADMIN'), pharmacieController.supprimer);
 
+// Routes admin
+router.get('/en-attente', verifierAuth, verifierRole('ADMIN'), pharmacieController.obtenirEnAttente);
+router.get('/toutes', verifierAuth, verifierRole('ADMIN'), pharmacieController.obtenirToutesAdmin);
+
 export default router;

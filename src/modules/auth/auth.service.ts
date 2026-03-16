@@ -39,7 +39,27 @@ export const authService = {
       role: 'PHARMACIEN',
     });
 
-    return nouvelUtilisateur;
+    // Générer le token JWT pour permettre la connexion immédiate
+    const secret = process.env.JWT_SECRET as string;
+    const token = jwt.sign(
+      {
+        id: nouvelUtilisateur.id,
+        email: nouvelUtilisateur.email,
+        role: nouvelUtilisateur.role,
+      },
+      secret,
+      { expiresIn: '7d' }
+    );
+
+    return {
+      token,
+      utilisateur: {
+        id: nouvelUtilisateur.id,
+        nom: nouvelUtilisateur.nom,
+        email: nouvelUtilisateur.email,
+        role: nouvelUtilisateur.role,
+      },
+    };
   },
 
   /**

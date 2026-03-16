@@ -177,6 +177,27 @@ export const pharmacieRepository = {
   },
 
   /**
+   * Retourne toutes les pharmacies en attente de validation.
+   */
+  trouverEnAttente: () => {
+    return prisma.pharmacie.findMany({
+      where: { estValidee: false },
+      include: { proprietaire: true },
+      orderBy: { dateCreation: 'desc' },
+    });
+  },
+
+  /**
+   * Retourne toutes les pharmacies pour l'admin (incluant non validées).
+   */
+  trouverToutesAdmin: () => {
+    return prisma.pharmacie.findMany({
+      include: { proprietaire: true },
+      orderBy: { dateCreation: 'desc' },
+    });
+  },
+
+  /**
    * Change le statut d'ouverture d'une pharmacie.
    * @param id - Identifiant de la pharmacie
    * @param estOuverte - Nouveau statut
