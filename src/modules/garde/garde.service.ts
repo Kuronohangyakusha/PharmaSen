@@ -1,5 +1,5 @@
 import { gardeRepository } from './garde.repository';
-import { stockService } from '../stock/stock.service';
+import { pharmacieRepository } from '../pharmacie/pharmacie.repository';
 import { ErreurApplication } from '../../utils/erreur.util';
 import { CODES_HTTP } from '../../constantes/codes-http';
 import { MESSAGES } from '../../constantes/messages';
@@ -47,7 +47,13 @@ export const gardeService = {
    * @param proprietaireId - Id du pharmacien connecté
    */
   creer: async (donnees: CreerGardeDto, proprietaireId: string) => {
-    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
+    const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireId);
+    if (!pharmacie) {
+      throw new ErreurApplication(
+        'Vous n\'avez pas encore de pharmacie. Créez d\'abord votre pharmacie pour déclarer une garde.',
+        CODES_HTTP.INTROUVABLE
+      );
+    }
 
     // Vérifier que la pharmacie est validée par l'admin
     if (!pharmacie.estValidee) {
@@ -76,7 +82,14 @@ export const gardeService = {
    */
   modifier: async (id: string, donnees: ModifierGardeDto, proprietaireId: string) => {
     const garde = await gardeService.obtenirParId(id);
-    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
+    const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireId);
+
+    if (!pharmacie) {
+      throw new ErreurApplication(
+        'Vous n\'avez pas de pharmacie',
+        CODES_HTTP.INTROUVABLE
+      );
+    }
 
     // Vérifier que la garde appartient à la pharmacie du pharmacien
     if (garde.pharmacieId !== pharmacie.id) {
@@ -106,7 +119,14 @@ export const gardeService = {
    */
   supprimer: async (id: string, proprietaireId: string) => {
     const garde = await gardeService.obtenirParId(id);
-    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
+    const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireId);
+
+    if (!pharmacie) {
+      throw new ErreurApplication(
+        'Vous n\'avez pas de pharmacie',
+        CODES_HTTP.INTROUVABLE
+      );
+    }
 
     if (garde.pharmacieId !== pharmacie.id) {
       throw new ErreurApplication(

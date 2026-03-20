@@ -3,8 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 import prisma from './config/prisma';
 import { gererErreurs } from './middlewares/erreur.middleware';
+import { initialiserSocketIO } from './services/socket.service';
 import authRoutes from './modules/auth/auth.routes';
 import medicamentRoutes from './modules/medicament/medicament.routes';
 import pharmacieRoutes from './modules/pharmacie/pharmacie.routes';
@@ -41,8 +43,14 @@ async function demarrerServeur(): Promise<void> {
   try {
     await prisma.$connect();
     console.log('✅ Connexion base de données : OK');
-    app.listen(PORT, () => {
+    
+    // Créer le serveur HTTP et initialiser Socket.io
+    const httpServer = createServer(app);
+    initialiserSocketIO(httpServer);
+    
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+      console.log(`🔌 Socket.io enabled`);
     });
   } catch (erreur) {
     console.error('❌ Erreur connexion base de données :', erreur);

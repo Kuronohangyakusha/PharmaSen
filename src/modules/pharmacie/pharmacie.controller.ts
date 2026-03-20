@@ -98,6 +98,18 @@ export const pharmacieController = {
     }
   },
 
+  /** PATCH /api/pharmacies/:id/rejeter */
+  rejeter: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = req.params['id'] as string;
+      const { motif } = req.body;
+      await pharmacieService.rejeter(id, motif);
+      repondreSucces(res, null, 'Demande de pharmacie refusée');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
+
   /** PATCH /api/pharmacies/:id/statut */
   changerStatut: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

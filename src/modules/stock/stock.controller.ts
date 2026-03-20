@@ -37,8 +37,7 @@ export const stockController = {
   creer: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const proprietaireId = req.utilisateur!.id;
-      const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
-      const stock = await stockService.creer(req.body, pharmacie.id);
+      const stock = await stockService.creer(req.body, proprietaireId);
       repondreSucces(res, stock, MESSAGES.STOCK.CREE_SUCCES, CODES_HTTP.CREE);
     } catch (erreur) {
       next(erreur);
@@ -50,8 +49,7 @@ export const stockController = {
     try {
       const id = req.params['id'] as string;
       const proprietaireId = req.utilisateur!.id;
-      const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
-      const stock = await stockService.modifier(id, req.body, pharmacie.id);
+      const stock = await stockService.modifier(id, req.body, proprietaireId);
       repondreSucces(res, stock, MESSAGES.STOCK.MODIFIE_SUCCES);
     } catch (erreur) {
       next(erreur);
@@ -63,8 +61,7 @@ export const stockController = {
     try {
       const id = req.params['id'] as string;
       const proprietaireId = req.utilisateur!.id;
-      const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
-      await stockService.supprimer(id, pharmacie.id);
+      await stockService.supprimer(id, proprietaireId);
       repondreSucces(res, null, MESSAGES.STOCK.SUPPRIME_SUCCES);
     } catch (erreur) {
       next(erreur);

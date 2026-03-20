@@ -53,6 +53,14 @@ export const stockService = {
   creer: async (donnees: CreerStockDto, proprietaireId: string) => {
     const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
 
+    // Vérifier que la pharmacie est validée
+    if (!pharmacie.estValidee) {
+      throw new ErreurApplication(
+        'Votre pharmacie doit être validée avant d\'ajouter des médicaments',
+        CODES_HTTP.ACCES_REFUSE
+      );
+    }
+
     // Vérifier que le médicament n'est pas déjà dans le stock
     const stockExistant = await stockRepository.trouverParPharmacieEtMedicament(
       pharmacie.id,
@@ -109,14 +117,14 @@ export const stockService = {
 
   /**
    * Récupère la pharmacie d'un pharmacien connecté.
-   * Lance une erreur 404 si le pharmacien n'a pas encore de pharmacie.
+   * Lance une erreur si le pharmacien n'a pas encore de pharmacie.
    * @param proprietaireId - Id du pharmacien connecté
    */
   obtenirPharmacieduPharmacien: async (proprietaireId: string) => {
     const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireId);
     if (!pharmacie) {
       throw new ErreurApplication(
-        MESSAGES.PHARMACIE.INTROUVABLE,
+        'Vous n\'avez pas encore de pharmacie. Créez d\'abord votre pharmacie pour ajouter des médicaments.',
         CODES_HTTP.INTROUVABLE
       );
     }

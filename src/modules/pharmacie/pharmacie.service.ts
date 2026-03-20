@@ -3,6 +3,8 @@ import { ErreurApplication } from '../../utils/erreur.util';
 import { CODES_HTTP } from '../../constantes/codes-http';
 import { MESSAGES } from '../../constantes/messages';
 import { CreerPharmacieDto, ModifierPharmacieDto } from './pharmacie.schema';
+import { notifierAdmin, notifierPharmacien } from '../../services/socket.service';
+import prisma from '../../config/prisma';
 
 /**
  * Service des pharmacies.
@@ -88,8 +90,8 @@ export const pharmacieService = {
    * Retourne la pharmacie du pharmacien connecté.
    * @param proprietaireId - Id du pharmacien connecté
    */
-  obtenirMaPharmacie: async (proprietaireireId: string) => {
-    const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireireId);
+  obtenirMaPharmacie: async (proprietaireId: string) => {
+    const pharmacie = await pharmacieRepository.trouverParProprietaire(proprietaireId);
     return pharmacie;
   },
 
@@ -109,11 +111,32 @@ export const pharmacieService = {
 
   /**
    * Crée une nouvelle pharmacie pour un pharmacien.
+   * Notifie l'admin par Socket.io.
    * @param donnees - Données de la pharmacie
    * @param proprietaireId - Id du pharmacien connecté
    */
-  creer: (donnees: CreerPharmacieDto, proprietaireId: string) => {
-    return pharmacieRepository.creer(donnees, proprietaireId);
+  creer: async (donnees: CreerPharmacieDto, proprietaireId: string) => {
+    // Créer la pharmacie
+    const pharmacie = await pharmacieRepository.creer(donnees, proprietaireId);
+    
+    // Récupérer les infos du pharmacien pour la notification
+    const proprietaire = await prisma.utilisateur.findUnique({
+      where: { id: proprietaireId },
+      select: { nom: true }
+    });
+    
+    // Notifier l'admin via Socket.io
+    notifierAdmin(
+      'NOUVELLE_PHARMACIE',
+      `Nouvelle demande de pharmacie: ${donnees.nom}`,
+      {
+        pharmacieId: pharmacie.id,
+        nomPharmacie: donnees.nom,
+        proprietaire: proprietaire?.nom
+      }
+    );
+    
+    return pharmacie;
   },
 
   /**
@@ -138,11 +161,47 @@ export const pharmacieService = {
 
   /**
    * Valide une pharmacie (admin uniquement).
+   * Notifie le pharmacien par Socket.io.
    * @param id - Identifiant de la pharmacie
    */
   valider: async (id: string) => {
-    await pharmacieService.obtenirParId(id);
-    return pharmacieRepository.valider(id);
+    const pharmacie = await pharmacieService.obtenirParId(id);
+    
+    // Valider la pharmacie
+    const pharmacieValidee = await pharmacieRepository.valider(id);
+    
+    // Notifier le pharmacien via Socket.io
+    notifierPharmacien(
+      pharmacie.proprietaireId,
+      'PHARMACIE_VALIDEE',
+      `Votre pharmacie "${pharmacie.nom}" a été validée !`,
+      { pharmacieId: id }
+    );
+    
+    return pharmacieValidee;
+  },
+
+  /**
+   * Rejette une pharmacie (admin uniquement).
+   * Notifie le pharmacien par Socket.io.
+   * @param id - Identifiant de la pharmacie
+   * @param motif - Motif du rejet (optionnel)
+   */
+  rejeter: async (id: string, motif?: string) => {
+    const pharmacie = await pharmacieService.obtenirParId(id);
+    
+    // Supprimer la pharmacie (rejet = suppression dans ce cas)
+    const pharmacieSupprimee = await pharmacieRepository.supprimer(id);
+    
+    // Notifier le pharmacien via Socket.io
+    notifierPharmacien(
+      pharmacie.proprietaireId,
+      'PHARMACIE_REJETEE',
+      `Votre demande de pharmacie "${pharmacie.nom}" a été refusée.`,
+      { pharmacieId: id, motif }
+    );
+    
+    return pharmacieSupprimee;
   },
 
   /**

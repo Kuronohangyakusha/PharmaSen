@@ -76,9 +76,6 @@ export const medicamentController = {
   /**
    * DELETE /api/medicaments/:id
    */
-  /**
-   * DELETE /api/medicaments/:id
-   */
   supprimer: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = req.params['id'] as string;

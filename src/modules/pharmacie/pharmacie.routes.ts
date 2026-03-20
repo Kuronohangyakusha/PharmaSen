@@ -24,6 +24,7 @@ router.get('/:id', pharmacieController.obtenirParId);
 router.post('/', verifierAuth, verifierRole('PHARMACIEN'), valider(creerPharmacieSchema), pharmacieController.creer);
 router.put('/:id', verifierAuth, verifierRole('PHARMACIEN', 'ADMIN'), valider(modifierPharmacieSchema), pharmacieController.modifier);
 router.patch('/:id/valider', verifierAuth, verifierRole('ADMIN'), pharmacieController.valider);
+router.patch('/:id/rejeter', verifierAuth, verifierRole('ADMIN'), pharmacieController.rejeter);
 router.patch('/:id/statut', verifierAuth, verifierRole('PHARMACIEN'), valider(changerStatutSchema), pharmacieController.changerStatut);
 router.delete('/:id', verifierAuth, verifierRole('ADMIN'), pharmacieController.supprimer);
 
