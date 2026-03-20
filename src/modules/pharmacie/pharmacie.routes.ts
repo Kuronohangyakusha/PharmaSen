@@ -18,6 +18,12 @@ router.get('/', pharmacieController.obtenirToutes);
 router.get('/recherche', pharmacieController.rechercher);
 router.get('/garde', pharmacieController.obtenirDeGarde);
 router.get('/moi', verifierAuth, verifierRole('PHARMACIEN'), pharmacieController.obtenirMaPharmacie);
+
+// Routes admin (doivent être AVANT /:id pour éviter que Express les interprète comme des IDs)
+router.get('/en-attente', verifierAuth, verifierRole('ADMIN'), pharmacieController.obtenirEnAttente);
+router.get('/toutes', verifierAuth, verifierRole('ADMIN'), pharmacieController.obtenirToutesAdmin);
+
+// Route par ID (doit être après les routes spécifiques)
 router.get('/:id', pharmacieController.obtenirParId);
 
 // Routes protégées
@@ -28,8 +34,6 @@ router.patch('/:id/rejeter', verifierAuth, verifierRole('ADMIN'), pharmacieContr
 router.patch('/:id/statut', verifierAuth, verifierRole('PHARMACIEN'), valider(changerStatutSchema), pharmacieController.changerStatut);
 router.delete('/:id', verifierAuth, verifierRole('ADMIN'), pharmacieController.supprimer);
 
-// Routes admin
-router.get('/en-attente', verifierAuth, verifierRole('ADMIN'), pharmacieController.obtenirEnAttente);
-router.get('/toutes', verifierAuth, verifierRole('ADMIN'), pharmacieController.obtenirToutesAdmin);
+// Routes admin (déplacées plus haut pour éviter les conflits avec /:id)
 
 export default router;

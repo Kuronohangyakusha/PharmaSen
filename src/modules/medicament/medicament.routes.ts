@@ -15,6 +15,8 @@ const router = Router();
 // Routes publiques
 router.get('/', medicamentController.obtenirTous);
 router.get('/recherche', medicamentController.rechercher);
+
+// Route par ID (doit être après les routes spécifiques)
 router.get('/:id', medicamentController.obtenirParId);
 
 // Routes protégées (Admin uniquement)
