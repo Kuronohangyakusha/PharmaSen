@@ -12,6 +12,7 @@ import medicamentRoutes from './modules/medicament/medicament.routes';
 import pharmacieRoutes from './modules/pharmacie/pharmacie.routes';
 import stockRoutes from './modules/stock/stock.routes';
 import gardeRoutes from './modules/garde/garde.routes';
+import utilisateurRoutes from './modules/utilisateur/utilisateur.routes';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/medicaments', medicamentRoutes);
 app.use('/api/pharmacies', pharmacieRoutes);
 app.use('/api/stocks', stockRoutes);
 app.use('/api/gardes', gardeRoutes);
+app.use('/api/utilisateurs', utilisateurRoutes);
 
 // Route de test
 app.get('/', (req, res) => {

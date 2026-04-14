@@ -1,15 +1,22 @@
 import { z } from 'zod';
 
+const coordonneesOptionnelles = {
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+};
+
 /**
  * Schéma de validation pour la création d'une pharmacie.
+ * Latitude et longitude sont optionnels - ils seront automatiquement récupérés
+ * via la géolocalisation du navigateur si non fournis.
  */
 export const creerPharmacieSchema = z.object({
   nom: z.string().min(2, 'Le nom est requis'),
   adresse: z.string().min(5, 'L\'adresse est requise'),
   quartier: z.string().min(2, 'Le quartier est requis'),
   telephone: z.string().min(9, 'Le téléphone est requis'),
-  latitude: z.number({ message: 'La latitude est requise' }),
-  longitude: z.number({ message: 'La longitude est requise' }),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   horaires: z.string().min(2, 'Les horaires sont requis'),
 });
 

@@ -112,12 +112,24 @@ export const pharmacieService = {
   /**
    * Crée une nouvelle pharmacie pour un pharmacien.
    * Notifie l'admin par Socket.io.
+   * Si latitude/longitude non fournis, utilise les coordonnées par défaut (Dakar).
    * @param donnees - Données de la pharmacie
    * @param proprietaireId - Id du pharmacien connecté
    */
   creer: async (donnees: CreerPharmacieDto, proprietaireId: string) => {
-    // Créer la pharmacie
-    const pharmacie = await pharmacieRepository.creer(donnees, proprietaireId);
+    const COORDONNEES_PAR_DEFAUT = { latitude: 14.6937, longitude: -17.444 };
+
+    const donneesAvecCoordonnees = {
+      nom: donnees.nom,
+      adresse: donnees.adresse,
+      quartier: donnees.quartier,
+      telephone: donnees.telephone,
+      horaires: donnees.horaires,
+      latitude: donnees.latitude ?? COORDONNEES_PAR_DEFAUT.latitude,
+      longitude: donnees.longitude ?? COORDONNEES_PAR_DEFAUT.longitude,
+    };
+
+    const pharmacie = await pharmacieRepository.creer(donneesAvecCoordonnees, proprietaireId);
     
     // Récupérer les infos du pharmacien pour la notification
     const proprietaire = await prisma.utilisateur.findUnique({

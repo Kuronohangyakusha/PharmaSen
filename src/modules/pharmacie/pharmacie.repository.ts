@@ -129,10 +129,10 @@ export const pharmacieRepository = {
 
   /**
    * Crée une nouvelle pharmacie.
-   * @param donnees - Données de la pharmacie
+   * @param donnees - Données de la pharmacie (latitude/longitude обязательно définies)
    * @param proprietaireId - Id du pharmacien propriétaire
    */
-  creer: (donnees: CreerPharmacieDto, proprietaireId: string) => {
+  creer: (donnees: any, proprietaireId: string) => {
     return prisma.pharmacie.create({
       data: { ...donnees, proprietaireId },
     });

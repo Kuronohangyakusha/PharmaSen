@@ -65,4 +65,11 @@ export const MESSAGES = {
     REQUETE_INVALIDE: 'Données de la requête invalides',
     TERME_RECHERCHE_VIDE: 'Le terme de recherche ne peut pas être vide',
   },
+
+  // Utilisateurs
+  UTILISATEUR: {
+    LISTE_SUCCES: 'Utilisateurs récupérés avec succès',
+    MODIFIE_SUCCES: 'Statut modifié avec succès',
+    INTROUVABLE: 'Utilisateur introuvable',
+  },
 };
