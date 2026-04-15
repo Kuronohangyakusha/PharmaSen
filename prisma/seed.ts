@@ -144,31 +144,40 @@ async function main() {
   console.log(`📦 ${stocksData.length} stocks créés`);
 
   // ================================
-  // Création des gardes pour AUJOURD'HUI
+  // Création des gardes pour les 7 prochains jours
   // ================================
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-
-  await Promise.all([
-    // Garde de jour AUJOURD'HUI
-    prisma.garde.create({ data: {
-      pharmacieId: pharmacies[0].id,
-      dateDebut: new Date(today.getTime() + 8 * 60 * 60 * 1000), // 08:00
-      dateFin: new Date(today.getTime() + 20 * 60 * 60 * 1000),   // 20:00
+  
+  const gardesData = [];
+  
+  for (let i = 0; i < 7; i++) {
+    const jour = new Date(today);
+    jour.setDate(today.getDate() + i);
+    
+    // Garde de jour
+    gardesData.push({
+      pharmacieId: pharmacies[i % pharmacies.length].id,
+      dateDebut: new Date(jour.getTime() + 8 * 60 * 60 * 1000),
+      dateFin: new Date(jour.getTime() + 20 * 60 * 60 * 1000),
       typeGarde: 'JOUR',
-    }}),
-    // Garde de nuit AUJOURD'HUI
-    prisma.garde.create({ data: {
-      pharmacieId: pharmacies[2].id,
-      dateDebut: new Date(today.getTime() + 20 * 60 * 60 * 1000), // 20:00
-      dateFin: new Date(tomorrow.getTime() + 8 * 60 * 60 * 1000),   // 08:00 tomorrow
-      typeGarde: 'NUIT',
-    }}),
-  ]);
+    });
+    
+    // Garde de nuit
+    if (i + 1 < pharmacies.length) {
+      const jourSuivant = new Date(jour);
+      jourSuivant.setDate(jour.getDate() + 1);
+      gardesData.push({
+        pharmacieId: pharmacies[(i + 1) % pharmacies.length].id,
+        dateDebut: new Date(jour.getTime() + 20 * 60 * 60 * 1000),
+        dateFin: new Date(jourSuivant.getTime() + 8 * 60 * 60 * 1000),
+        typeGarde: 'NUIT',
+      });
+    }
+  }
 
-  console.log('💂 4 gardes créées');
+  await prisma.garde.createMany({ data: gardesData });
+  console.log(`💂 ${gardesData.length} gardes créées pour les 7 prochains jours`);
   console.log('✅ Seed terminé avec succès !');
   console.log('');
   console.log('📋 Comptes créés :');

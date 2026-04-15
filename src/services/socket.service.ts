@@ -8,9 +8,11 @@ let io: SocketIOServer | null = null;
  * @param httpServer - Serveur HTTP existant
  */
 export function initialiserSocketIO(httpServer: HTTPServer): SocketIOServer {
+  const corsOrigin = process.env.CORS_ORIGINE_AUTORISEE || '*';
+  
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: '*',
+      origin: corsOrigin,
       methods: ['GET', 'POST'],
     },
   });

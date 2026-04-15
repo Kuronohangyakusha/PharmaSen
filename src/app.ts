@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import prisma from './config/prisma';
 import { gererErreurs } from './middlewares/erreur.middleware';
 import { initialiserSocketIO } from './services/socket.service';
+import logger from './services/logger.service';
 import authRoutes from './modules/auth/auth.routes';
 import medicamentRoutes from './modules/medicament/medicament.routes';
 import pharmacieRoutes from './modules/pharmacie/pharmacie.routes';
@@ -23,7 +24,11 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGINE_AUTORISEE }));
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan('combined', {
+  stream: {
+    write: (message: string) => logger.http(message.trim()),
+  },
+}));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -44,18 +49,17 @@ app.use(gererErreurs);
 async function demarrerServeur(): Promise<void> {
   try {
     await prisma.$connect();
-    console.log('✅ Connexion base de données : OK');
+    logger.info('✅ Connexion base de données : OK');
     
-    // Créer le serveur HTTP et initialiser Socket.io
     const httpServer = createServer(app);
     initialiserSocketIO(httpServer);
     
     httpServer.listen(PORT, () => {
-      console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-      console.log(`🔌 Socket.io enabled`);
+      logger.info(`🚀 Serveur démarré sur le port ${PORT}`);
+      logger.info(`🔌 Socket.io enabled`);
     });
   } catch (erreur) {
-    console.error('❌ Erreur connexion base de données :', erreur);
+    logger.error('❌ Erreur connexion base de données :', erreur);
     process.exit(1);
   }
 }

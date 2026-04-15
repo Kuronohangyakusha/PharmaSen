@@ -53,7 +53,7 @@ model Medicament {
 model Stock {
   id            String     @id @default(uuid())
   quantite      Int        @default(0)
-  prix          Float
+  prix          Int
   estDisponible Boolean    @default(true)
   dateMaj       DateTime   @updatedAt
   pharmacieId   String
