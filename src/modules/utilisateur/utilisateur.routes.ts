@@ -15,4 +15,9 @@ router.get('/', verifierAuth, verifierRole('ADMIN'), utilisateurController.obten
 router.patch('/:id/statut', verifierAuth, verifierRole('ADMIN'), utilisateurController.modifierStatut);
 router.delete('/:id', verifierAuth, verifierRole('ADMIN'), utilisateurController.supprimer);
 
+// Routes pour les notifications (fallback polling)
+router.get('/notifications', verifierAuth, utilisateurController.obtenirNotifications);
+router.patch('/notifications/:id/lu', verifierAuth, utilisateurController.marquerNotificationLue);
+router.patch('/notifications/lu', verifierAuth, utilisateurController.toutMarquerLu);
+
 export default router;

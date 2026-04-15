@@ -34,4 +34,35 @@ export const utilisateurController = {
       next(erreur);
     }
   },
+
+  obtenirNotifications: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const utilisateurId = req.utilisateur!.id;
+      const notifications = await utilisateurService.obtenirNotifications(utilisateurId);
+      repondreSucces(res, notifications, 'Notifications récupérées');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
+
+  marquerNotificationLue: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = req.params['id'] as string;
+      const utilisateurId = req.utilisateur!.id;
+      await utilisateurService.marquerNotificationLue(id, utilisateurId);
+      repondreSucces(res, null, 'Notification marquée comme lue');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
+
+  toutMarquerLu: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const utilisateurId = req.utilisateur!.id;
+      await utilisateurService.toutMarquerLu(utilisateurId);
+      repondreSucces(res, null, 'Toutes les notifications marquées comme lues');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
 };

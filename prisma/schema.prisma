@@ -73,6 +73,16 @@ model Garde {
   pharmacie   Pharmacie @relation(fields: [pharmacieId], references: [id], onDelete: Cascade)
 }
 
+model Notification {
+  id            String   @id @default(uuid())
+  type          String
+  message       String
+  data          Json?
+  destinataireId String
+  estLue        Boolean  @default(false)
+  dateCreation  DateTime @default(now())
+}
+
 enum Role {
   VISITEUR
   PHARMACIEN

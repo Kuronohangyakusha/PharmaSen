@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io';
 import { Server as HTTPServer } from 'http';
+import prisma from '../config/prisma';
 
 let io: SocketIOServer | null = null;
 
@@ -46,14 +47,39 @@ export function initialiserSocketIO(httpServer: HTTPServer): SocketIOServer {
  * @param message - Message de la notification
  * @param data - Données supplémentaires
  */
-export function notifierAdmin(type: string, message: string, data?: any): void {
+export async function notifierAdmin(type: string, message: string, data?: any): Promise<void> {
+  const notificationData = {
+    type,
+    message,
+    data,
+    timestamp: new Date().toISOString(),
+  };
+
+  // Émettre via Socket.io si connecté
   if (io) {
-    io.to('admin').emit('notification', {
-      type,
-      message,
-      data,
-      timestamp: new Date().toISOString(),
+    io.to('admin').emit('notification', notificationData);
+  }
+
+  // Sauvegarder en base pour fallback polling - trouver l'admin réel
+  try {
+    const admin = await prisma.utilisateur.findFirst({
+      where: { role: 'ADMIN' },
+      select: { id: true },
     });
+
+    if (admin) {
+      await prisma.notification.create({
+        data: {
+          type,
+          message,
+          data,
+          destinataireId: admin.id,
+          estLue: false,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('❌ Erreur sauvegarde notification:', error);
   }
 }
 
@@ -64,14 +90,32 @@ export function notifierAdmin(type: string, message: string, data?: any): void {
  * @param message - Message de la notification
  * @param data - Données supplémentaires
  */
-export function notifierPharmacien(pharmacienId: string, type: string, message: string, data?: any): void {
+export async function notifierPharmacien(pharmacienId: string, type: string, message: string, data?: any): Promise<void> {
+  const notificationData = {
+    type,
+    message,
+    data,
+    timestamp: new Date().toISOString(),
+  };
+
+  // Émettre via Socket.io si connecté
   if (io) {
-    io.to(`pharmacien:${pharmacienId}`).emit('notification', {
-      type,
-      message,
-      data,
-      timestamp: new Date().toISOString(),
+    io.to(`pharmacien:${pharmacienId}`).emit('notification', notificationData);
+  }
+
+  // Sauvegarder en base pour fallback polling
+  try {
+    await prisma.notification.create({
+      data: {
+        type,
+        message,
+        data,
+        destinataireId: pharmacienId,
+        estLue: false,
+      },
     });
+  } catch (error) {
+    console.error('❌ Erreur sauvegarde notification:', error);
   }
 }
 
