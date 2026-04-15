@@ -34,7 +34,7 @@ model Pharmacie {
   dateCreation   DateTime    @default(now())
   dateMaj        DateTime    @updatedAt
   proprietaireId String      @unique
-  proprietaire   Utilisateur @relation(fields: [proprietaireId], references: [id])
+  proprietaire   Utilisateur @relation(fields: [proprietaireId], references: [id], onDelete: Cascade)
   stocks         Stock[]
   gardes         Garde[]
 }
@@ -58,8 +58,8 @@ model Stock {
   dateMaj       DateTime   @updatedAt
   pharmacieId   String
   medicamentId  String
-  pharmacie     Pharmacie  @relation(fields: [pharmacieId], references: [id])
-  medicament    Medicament @relation(fields: [medicamentId], references: [id])
+  pharmacie     Pharmacie  @relation(fields: [pharmacieId], references: [id], onDelete: Cascade)
+  medicament    Medicament @relation(fields: [medicamentId], references: [id], onDelete: Cascade)
 
   @@unique([pharmacieId, medicamentId])
 }
@@ -70,7 +70,7 @@ model Garde {
   dateFin     DateTime
   typeGarde   TypeGarde @default(JOUR)
   pharmacieId String
-  pharmacie   Pharmacie @relation(fields: [pharmacieId], references: [id])
+  pharmacie   Pharmacie @relation(fields: [pharmacieId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

@@ -221,8 +221,14 @@ export const pharmacieService = {
    * @param id - Identifiant de la pharmacie
    */
   supprimer: async (id: string) => {
-    await pharmacieService.obtenirParId(id);
-    return pharmacieRepository.supprimer(id);
+    const pharmacie = await prisma.pharmacie.findUnique({ where: { id } });
+    if (!pharmacie) {
+      throw new ErreurApplication(
+        MESSAGES.PHARMACIE.INTROUVABLE,
+        CODES_HTTP.INTROUVABLE
+      );
+    }
+    return prisma.pharmacie.delete({ where: { id } });
   },
 
   /**

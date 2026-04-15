@@ -4,9 +4,10 @@ import { z } from 'zod';
  * Schéma de validation pour la création d'une garde.
  */
 export const creerGardeSchema = z.object({
+  pharmacieId: z.string().uuid('ID pharmacy invalide'),
   dateDebut: z.string().datetime('Date de début invalide'),
   dateFin: z.string().datetime('Date de fin invalide'),
-  typeGarde: z.enum(['JOUR', 'NUIT']).default('JOUR'),
+  typeGarde: z.enum(['JOUR', 'NUIT']).default('NUIT'),
 });
 
 /**
