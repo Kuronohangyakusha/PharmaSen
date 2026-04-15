@@ -13,6 +13,15 @@ export const authRepository = {
   trouverParEmail: (email: string) => {
     return prisma.utilisateur.findUnique({
       where: { email },
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        motDePasse: true,
+        role: true,
+        estActif: true,
+        dateCreation: true,
+      },
     });
   },
 

@@ -23,4 +23,8 @@ export const utilisateurRepository = {
   modifier: (id: string, data: { estActif?: boolean }) => {
     return prisma.utilisateur.update({ where: { id }, data });
   },
+
+  supprimer: (id: string) => {
+    return prisma.utilisateur.delete({ where: { id } });
+  },
 };

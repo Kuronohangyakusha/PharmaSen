@@ -34,6 +34,4 @@ router.patch('/:id/rejeter', verifierAuth, verifierRole('ADMIN'), pharmacieContr
 router.patch('/:id/statut', verifierAuth, verifierRole('PHARMACIEN'), valider(changerStatutSchema), pharmacieController.changerStatut);
 router.delete('/:id', verifierAuth, verifierRole('ADMIN'), pharmacieController.supprimer);
 
-// Routes admin (déplacées plus haut pour éviter les conflits avec /:id)
-
 export default router;

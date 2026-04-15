@@ -30,13 +30,13 @@ model Pharmacie {
   longitude      Float
   horaires       String
   estValidee     Boolean     @default(false)
-  estOuverte     Boolean     @default(true)
   dateCreation   DateTime    @default(now())
   dateMaj        DateTime    @updatedAt
   proprietaireId String      @unique
+  estOuverte     Boolean     @default(true)
+  gardes         Garde[]
   proprietaire   Utilisateur @relation(fields: [proprietaireId], references: [id], onDelete: Cascade)
   stocks         Stock[]
-  gardes         Garde[]
 }
 
 model Medicament {
@@ -53,13 +53,13 @@ model Medicament {
 model Stock {
   id            String     @id @default(uuid())
   quantite      Int        @default(0)
-  prix          Int
+  prix          Float
   estDisponible Boolean    @default(true)
   dateMaj       DateTime   @updatedAt
   pharmacieId   String
   medicamentId  String
-  pharmacie     Pharmacie  @relation(fields: [pharmacieId], references: [id], onDelete: Cascade)
   medicament    Medicament @relation(fields: [medicamentId], references: [id], onDelete: Cascade)
+  pharmacie     Pharmacie  @relation(fields: [pharmacieId], references: [id], onDelete: Cascade)
 
   @@unique([pharmacieId, medicamentId])
 }

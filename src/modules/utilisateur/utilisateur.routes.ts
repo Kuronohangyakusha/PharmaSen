@@ -13,5 +13,6 @@ const router = Router();
 // Routes protégées - Admin uniquement
 router.get('/', verifierAuth, verifierRole('ADMIN'), utilisateurController.obtenirTous);
 router.patch('/:id/statut', verifierAuth, verifierRole('ADMIN'), utilisateurController.modifierStatut);
+router.delete('/:id', verifierAuth, verifierRole('ADMIN'), utilisateurController.supprimer);
 
 export default router;

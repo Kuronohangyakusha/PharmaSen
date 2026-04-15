@@ -24,4 +24,14 @@ export const utilisateurController = {
       next(erreur);
     }
   },
+
+  supprimer: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = req.params['id'] as string;
+      await utilisateurService.supprimer(id);
+      repondreSucces(res, null, 'Utilisateur supprimé avec succès');
+    } catch (erreur) {
+      next(erreur);
+    }
+  },
 };

@@ -76,6 +76,14 @@ export const authService = {
       );
     }
 
+    // Vérifier si le compte est actif
+    if (!utilisateur.estActif) {
+      throw new ErreurApplication(
+        'Votre compte a été désactivé. Veuillez contacter l\'administrateur.',
+        CODES_HTTP.ACCES_REFUSE
+      );
+    }
+
     // Vérifier le mot de passe
     const motDePasseValide = await bcrypt.compare(
       donnees.motDePasse,
