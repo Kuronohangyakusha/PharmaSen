@@ -11,13 +11,13 @@ const coordonneesOptionnelles = {
  * via la géolocalisation du navigateur si non fournis.
  */
 export const creerPharmacieSchema = z.object({
-  nom: z.string().min(2, 'Le nom est requis'),
-  adresse: z.string().min(5, 'L\'adresse est requise'),
-  quartier: z.string().min(2, 'Le quartier est requis'),
-  telephone: z.string().min(9, 'Le téléphone est requis'),
+  nom: z.string().min(1, 'Le nom est requis'),
+  adresse: z.string().min(1, 'L\'adresse est requise'),
+  quartier: z.string().min(1, 'Le quartier est requis'),
+  telephone: z.string().min(8, 'Le téléphone est requis'),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  horaires: z.string().min(2, 'Les horaires sont requis'),
+  horaires: z.string().min(1, 'Les horaires sont requis'),
 });
 
 /**

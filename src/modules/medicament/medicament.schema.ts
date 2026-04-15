@@ -4,10 +4,10 @@ import { z } from 'zod';
  * Schéma de validation pour la création d'un médicament.
  */
 export const creerMedicamentSchema = z.object({
-  nomCommercial: z.string().min(2, 'Le nom commercial est requis'),
-  nomGenerique: z.string().min(2, 'Le nom générique est requis'),
+  nomCommercial: z.string().min(1, 'Le nom commercial est requis'),
+  nomGenerique: z.string().min(1, 'Le nom générique est requis'),
   description: z.string().optional(),
-  categorie: z.string().min(2, 'La catégorie est requise'),
+  categorie: z.string().min(1, 'La catégorie est requise'),
 });
 
 /**
