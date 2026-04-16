@@ -77,17 +77,20 @@ export const stockService = {
     return stockRepository.creer(donnees, pharmacie.id);
   },
 
-  /**
-   * Modifie un stock existant.
-   * @param id - Identifiant du stock
-   * @param donnees - Données à modifier
-   * @param pharmacieId - Id de la pharmacie du pharmacien connecté
-   */
-  modifier: async (id: string, donnees: ModifierStockDto, pharmacieId: string) => {
+/**
+    * Modifie un stock existant.
+    * @param id - Identifiant du stock
+    * @param donnees - Données à modifier
+    * @param proprietaireId - Id du pharmacien connecté
+    */
+  modifier: async (id: string, donnees: ModifierStockDto, proprietaireId: string) => {
     const stock = await stockService.obtenirParId(id);
+    
+    // Récupérer la pharmacie du pharmacien
+    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
 
     // Vérifier que le stock appartient bien à la pharmacie du pharmacien
-    if (stock.pharmacieId !== pharmacieId) {
+    if (stock.pharmacieId !== pharmacie.id) {
       throw new ErreurApplication(
         MESSAGES.AUTH.ACCES_REFUSE,
         CODES_HTTP.ACCES_REFUSE
@@ -97,15 +100,18 @@ export const stockService = {
     return stockRepository.modifier(id, donnees);
   },
 
-  /**
-   * Supprime un médicament du stock.
-   * @param id - Identifiant du stock
-   * @param pharmacieId - Id de la pharmacie du pharmacien connecté
-   */
-  supprimer: async (id: string, pharmacieId: string) => {
+/**
+    * Supprime un médicament du stock.
+    * @param id - Identifiant du stock
+    * @param proprietaireId - Id du pharmacien connecté
+    */
+  supprimer: async (id: string, proprietaireId: string) => {
     const stock = await stockService.obtenirParId(id);
+    
+    // Récupérer la pharmacie du pharmacien
+    const pharmacie = await stockService.obtenirPharmacieduPharmacien(proprietaireId);
 
-    if (stock.pharmacieId !== pharmacieId) {
+    if (stock.pharmacieId !== pharmacie.id) {
       throw new ErreurApplication(
         MESSAGES.AUTH.ACCES_REFUSE,
         CODES_HTTP.ACCES_REFUSE
