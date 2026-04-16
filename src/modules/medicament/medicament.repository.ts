@@ -41,6 +41,7 @@ export const medicamentRepository = {
         ],
       },
       orderBy: { nomCommercial: 'asc' },
+      take: 10,
     });
   },
 
